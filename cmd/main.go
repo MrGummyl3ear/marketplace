@@ -5,25 +5,26 @@ import (
 	"marketplace/pkg/handler"
 	"marketplace/pkg/repository"
 	"marketplace/pkg/service"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 
-	if err := InitConfig(); err != nil {
-		logrus.Fatalf("error initialazing config: %s", err)
+	if err := godotenv.Load(); err != nil {
+		logrus.Fatalf("error loading env variables: %s", err.Error())
 	}
 
 	db, err := repository.NewPostgresDB(repository.Config{
-		Host:     "localhost",
-		Port:     "5436",
-		Username: "postgres",
-		Password: "qwerty",
-		DBName:   "postgres",
-		SSLMode:  "disable",
+		Host:     os.Getenv("DB_Host"),
+		Port:     os.Getenv("DB_PORT"),
+		Username: os.Getenv("DB_Username"),
+		Password: os.Getenv("DB_PASSWORD"),
+		DBName:   os.Getenv("DBName"),
+		SSLMode:  os.Getenv("SSLMode"),
 	})
 	if err != nil {
 		logrus.Fatalf("failed to initialize db: %s ", err)
@@ -35,13 +36,7 @@ func main() {
 
 	srv := new(marketplace.Server)
 
-	if err := srv.Run("8000", handlers.InitRoutes()); err != nil {
+	if err := srv.Run(os.Getenv("Server_PORT"), handlers.InitRoutes()); err != nil {
 		logrus.Fatalf("error occured while running http server:  %s", err.Error())
 	}
-}
-
-func InitConfig() error {
-	viper.AddConfigPath("config")
-	viper.SetConfigName("config")
-	return viper.ReadInConfig()
 }

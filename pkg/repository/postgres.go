@@ -35,5 +35,10 @@ func NewPostgresDB(cfg Config) (*gorm.DB, error) {
 		log.Println(err)
 	}
 
+	err = db.AutoMigrate(&model.Item{})
+	if err != nil {
+		log.Println(err)
+	}
+
 	return db, nil
 }

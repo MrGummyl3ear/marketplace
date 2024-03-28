@@ -22,6 +22,11 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		auth.POST("/sign-up", h.signUp)
 		auth.POST("/sign-in", h.signIn)
 	}
-	
+
+	feed := router.Group("/feed")
+	{
+		feed.POST("/create", h.userIdentity, h.createItem)
+	}
+
 	return router
 }

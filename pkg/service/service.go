@@ -9,9 +9,12 @@ import (
 
 type Authorization interface {
 	CreateUser(user model.User) (int, error)
+	GenerateToken(username, password string) (string, error)
+	ParseToken(token string) (int, error)
 }
 
 type Item interface {
+	Create(item model.Item) error
 }
 
 type Service struct {
@@ -22,5 +25,6 @@ type Service struct {
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
+		Item:          NewItemService(repos.Item),
 	}
 }
