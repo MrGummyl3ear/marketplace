@@ -26,3 +26,14 @@ func (r *ItemPostgres) Create(item model.Item) error {
 		return tx.Commit().Error
 	}
 }
+
+func (r *ItemPostgres) GetAllItems() ([]model.Item, error) {
+	var items []model.Item
+	tx := r.db.Begin()
+	err := tx.Find(&items).Error
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	return items, tx.Commit().Error
+}

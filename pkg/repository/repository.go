@@ -13,6 +13,7 @@ type Authorization interface {
 
 type Item interface {
 	Create(item model.Item) error
+	GetAllItems() ([]model.Item, error)
 }
 
 type Repository struct {

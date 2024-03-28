@@ -16,3 +16,7 @@ func NewItemService(repo repository.Item) *ItemService {
 func (s *ItemService) Create(item model.Item) error {
 	return s.repo.Create(item)
 }
+
+func (s *ItemService) GetAllItems() ([]model.Item, error) {
+	return s.repo.GetAllItems()
+}

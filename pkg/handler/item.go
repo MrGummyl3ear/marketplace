@@ -9,14 +9,16 @@ import (
 )
 
 func (h *Handler) createItem(c *gin.Context) {
-	_, ok := c.Get(userCtx)
+	username, ok := c.Get(userCtx)
 	if !ok {
-		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
+		newErrorResponse(c, http.StatusInternalServerError, "username not found")
 		return
 	}
 
 	var input model.Item
 	input.CreatedAt = time.Now()
+	input.Username = username.(string)
+
 	if err := c.BindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -29,4 +31,20 @@ func (h *Handler) createItem(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, input)
+}
+
+type getAllItemsResponse struct {
+	Data []model.Item `json:"data"`
+}
+
+func (h *Handler) getAllItems(c *gin.Context) {
+	items, err := h.services.GetAllItems()
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, getAllItemsResponse{
+		Data: items,
+	})
 }

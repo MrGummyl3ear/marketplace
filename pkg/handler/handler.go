@@ -26,6 +26,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	feed := router.Group("/feed")
 	{
 		feed.POST("/create", h.userIdentity, h.createItem)
+		feed.GET("/", h.getAllItems)
 	}
 
 	return router
