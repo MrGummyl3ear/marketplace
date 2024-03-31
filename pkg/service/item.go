@@ -17,6 +17,6 @@ func (s *ItemService) Create(item model.Item) error {
 	return s.repo.Create(item)
 }
 
-func (s *ItemService) GetAllItems() ([]model.Item, error) {
-	return s.repo.GetAllItems()
+func (s *ItemService) GetAllItems(params model.QueryParam) ([]model.Item, error) {
+	return s.repo.GetAllItems(params)
 }

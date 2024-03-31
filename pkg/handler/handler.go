@@ -17,6 +17,9 @@ func NewHandler(services *service.Service) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
+	router.LoadHTMLGlob("templates/**/*")
+	router.Static("/assets", "./assets")
+
 	auth := router.Group("/auth")
 	{
 		auth.POST("/sign-up", h.signUp)

@@ -15,7 +15,7 @@ type Authorization interface {
 
 type Item interface {
 	Create(item model.Item) error
-	GetAllItems() ([]model.Item, error)
+	GetAllItems(params model.QueryParam) ([]model.Item, error)
 }
 
 type Service struct {

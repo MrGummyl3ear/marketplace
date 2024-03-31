@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"fmt"
 	"marketplace/pkg/model"
+	"math"
 
 	"gorm.io/gorm"
 )
@@ -27,13 +29,39 @@ func (r *ItemPostgres) Create(item model.Item) error {
 	}
 }
 
-func (r *ItemPostgres) GetAllItems() ([]model.Item, error) {
+func (r *ItemPostgres) GetAllItems(params model.QueryParam) ([]model.Item, error) {
 	var items []model.Item
 	tx := r.db.Begin()
-	err := tx.Find(&items).Error
+	var total int64
+	tx.Model(&model.Item{}).Where("price is not null").Count(&total)
+	totalPages := uint64(math.Ceil(float64(total) / float64(params.PageSize)))
+	if totalPages < params.Page {
+		return nil, fmt.Errorf("current page(%d) exceeds the total amount(%d)", params.Page, totalPages)
+	}
+
+	offset := (params.Page - 1) * params.PageSize
+	err := tx.Scopes(OrderByField(params), FilterPrice(params), Pagination(int(offset), int(params.PageSize))).Find(&items).Error
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 	return items, tx.Commit().Error
+}
+
+func FilterPrice(params model.QueryParam) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where(fmt.Sprintf("price >= %d and price <= %d", params.MinPrice, params.MaxPrice))
+	}
+}
+
+func OrderByField(params model.QueryParam) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Order(fmt.Sprintf("%s %s", params.Order, params.Sort))
+	}
+}
+
+func Pagination(offset int, pageSize int) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Offset(offset).Limit(pageSize)
+	}
 }
