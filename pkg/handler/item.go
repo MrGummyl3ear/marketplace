@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"marketplace/pkg/model"
 	"net/http"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -40,16 +41,30 @@ func (h *Handler) createItem(c *gin.Context) {
 	c.JSON(http.StatusOK, input)
 }
 
-type getAllItemsResponse struct {
-	Data []model.Item `json:"data"`
-}
-
 func (h *Handler) getAllItems(c *gin.Context) {
-	params, err := ParseQuery(c)
+	var params model.QueryParam
+	var err error
+
+	params, err = ParseQuery(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
+
+	params.MaxPage, err = h.services.GetMaxPage(params)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
+		return
+	}
+
+	if params.Page > params.MaxPage {
+		newErrorResponse(c, http.StatusBadRequest, "incorrect page")
+		return
+	}
+
+	re := regexp.MustCompile(`page=(\d+)`)
+	params.NextPage = re.ReplaceAllString(c.Request.URL.String(), fmt.Sprintf("page=%d", params.Page+1))
+	params.PrevPage = re.ReplaceAllString(c.Request.URL.String(), fmt.Sprintf("page=%d", params.Page-1))
 	//fmt.Printf("%+v\n", params)
 
 	items, err := h.services.GetAllItems(params)
@@ -58,14 +73,16 @@ func (h *Handler) getAllItems(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, getAllItemsResponse{
-		Data: items,
-	})
 	/*
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"posts": items,
+		c.JSON(http.StatusOK, getAllItemsResponse{
+			Data: items,
 		})
 	*/
+	c.HTML(http.StatusOK, "index.tmpl", gin.H{
+		"posts":      items,
+		"pagination": params,
+	})
+
 }
 
 func ParseQuery(c *gin.Context) (model.QueryParam, error) {
@@ -81,11 +98,11 @@ func ParseQuery(c *gin.Context) (model.QueryParam, error) {
 		return params, fmt.Errorf("incorrect format of sort")
 	}
 
-	params.MaxPrice, err = strconv.ParseUint(c.DefaultQuery("maxPrice", "99999"), 10, 64)
+	params.MaxPrice, err = strconv.ParseUint(c.DefaultQuery("maxPrice", "9999"), 10, 64)
 	if (err != nil) || (params.MaxPrice >= maxPriceLimit) {
 		return params, fmt.Errorf("incorrect format of max price")
 	}
-	params.MinPrice, err = strconv.ParseUint(c.DefaultQuery("minPrice", "99999"), 10, 64)
+	params.MinPrice, err = strconv.ParseUint(c.DefaultQuery("minPrice", "0"), 10, 64)
 	if (err != nil) || (params.MinPrice >= params.MaxPrice) {
 		return params, fmt.Errorf("incorrect format of min price")
 	}

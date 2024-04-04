@@ -34,14 +34,15 @@
     font-size: 21px;
   }
   
-  .posts-table {
+  .post-table {
     border-top: 1px solid #ddd;
+    text-align: center;
   }
   
   .post-row {
     display: flex;
     align-items: center;
-    padding: 12px 0;
+    padding: 1px 0;
     border-bottom: 1px solid #ddd;
   }
   
@@ -56,15 +57,12 @@
     background: white;
   }
   
-  .date {
-    width: 100px;
-  }
-  
-  .createdAt, 
+  .date,
   .price,
   .title,    
-  .content,   
+  .content,  
   .username{
+    width: 100px;
     flex: 1;
   }
   

@@ -16,6 +16,7 @@ type Authorization interface {
 type Item interface {
 	Create(item model.Item) error
 	GetAllItems(params model.QueryParam) ([]model.Item, error)
+	GetMaxPage(params model.QueryParam) (uint64, error)
 }
 
 type Service struct {

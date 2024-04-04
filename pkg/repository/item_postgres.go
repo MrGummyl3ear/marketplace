@@ -29,14 +29,19 @@ func (r *ItemPostgres) Create(item model.Item) error {
 	}
 }
 
+func (r *ItemPostgres) GetMaxPage(params model.QueryParam) (uint64, error) {
+	var total int64
+	tx := r.db.Begin()
+	tx.Model(&model.Item{}).Where("price is not null").Count(&total)
+	MaxPage := uint64(math.Ceil(float64(total) / float64(params.PageSize)))
+	return MaxPage, tx.Commit().Error
+}
+
 func (r *ItemPostgres) GetAllItems(params model.QueryParam) ([]model.Item, error) {
 	var items []model.Item
 	tx := r.db.Begin()
-	var total int64
-	tx.Model(&model.Item{}).Where("price is not null").Count(&total)
-	totalPages := uint64(math.Ceil(float64(total) / float64(params.PageSize)))
-	if totalPages < params.Page {
-		return nil, fmt.Errorf("current page(%d) exceeds the total amount(%d)", params.Page, totalPages)
+	if params.MaxPage < params.Page {
+		return nil, fmt.Errorf("current page(%d) exceeds the total amount(%d)", params.Page, params.MaxPage)
 	}
 
 	offset := (params.Page - 1) * params.PageSize
