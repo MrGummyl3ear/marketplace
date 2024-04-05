@@ -34,36 +34,7 @@
       {{ end }}
     </div>
 
-    <div class ="pagination">
-      <ul>
-        <li>
-          {{ if (gt .pagination.Page 1)}}
-          <a href = "{{ .pagination.PrevPage }}">
-            Previous
-          </a>
-          {{ else }}
-          <span>
-            Previous
-          </span>
-          {{ end }}
-          
-        </li>
-        <li>
-          {{ if (lt .pagination.Page .pagination.MaxPage)}}
-          <a href = "{{ .pagination.NextPage }}">
-            Next
-          </a>
-          {{ else }}
-          <span>
-            Next
-          </span>
-          {{ end }}
-          
-        </li>
-        </li>
-      </ul>
-    </div>
-  </div>
+{{template "pagination" .}}
 </div>
 
 {{template "bottom" .}}

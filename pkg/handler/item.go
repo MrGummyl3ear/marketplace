@@ -44,21 +44,11 @@ func (h *Handler) createItem(c *gin.Context) {
 func (h *Handler) getAllItems(c *gin.Context) {
 	var params model.QueryParam
 	var err error
+	var items []model.Item
 
 	params, err = ParseQuery(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
-		return
-	}
-
-	params.MaxPage, err = h.services.GetMaxPage(params)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
-		return
-	}
-
-	if params.Page > params.MaxPage {
-		newErrorResponse(c, http.StatusBadRequest, "incorrect page")
 		return
 	}
 
@@ -67,7 +57,7 @@ func (h *Handler) getAllItems(c *gin.Context) {
 	params.PrevPage = re.ReplaceAllString(c.Request.URL.String(), fmt.Sprintf("page=%d", params.Page-1))
 	//fmt.Printf("%+v\n", params)
 
-	items, err := h.services.GetAllItems(params)
+	items, params.MaxPage, err = h.services.GetAllItems(params)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
