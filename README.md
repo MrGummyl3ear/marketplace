@@ -4,5 +4,11 @@
     размещения нового поста;
     отображение ленты объявления(с различными фильтрами);
 
+```bash
+[GIN-debug] POST   /auth/sign-up             регистрация пользователя;
+[GIN-debug] POST   /auth/sign-in             авторизация пользователя;
+[GIN-debug] POST   /feed/create              размещения нового поста;
+[GIN-debug] GET    /feed/                    отображение ленты объявления(с различными фильтрами);
+```
 Пример работы приложения:
 ![image](https://github.com/MrGummyl3ear/marketplace/assets/105852328/b633e235-3c2f-48cd-93de-7c6ae83ef025)
